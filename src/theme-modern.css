@@ -121,6 +121,12 @@ body {
   box-shadow: 0 8px 18px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
+/* Mantener iconos blancos también en hover/activo */
+.vnav-item:hover .vnav-icon,
+.vnav-item.is-active .vnav-icon {
+  color: #ffffff !important;
+}
+
 .main-modern {
   max-width: 1100px;
   margin: 0 auto;
@@ -183,9 +189,11 @@ body {
   color: #e5e7eb;
   overflow: visible; /* permitir etiquetas fuera del área del canvas */
   width: 100%;
+  transition: transform .12s ease, box-shadow .25s ease;
 }
 .card-modern:hover {
   box-shadow: 0 16px 36px rgba(0,0,0,.32), 0 4px 14px rgba(0,0,0,.20);
+  transform: translateY(-2px);
 }
 
 /* Contenedor scroll para la gráfica grande */
@@ -283,6 +291,17 @@ body {
   box-shadow: 0 0 0 3px rgba(99,102,241,0.24);
 }
 
+/* Estados disabled consistentes */
+.input-modern:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  filter: grayscale(.15);
+}
+.input-modern:disabled:hover {
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
 /* Icono del calendario en blanco (WebKit) */
 .input-modern[type="date"]::-webkit-calendar-picker-indicator {
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V9h14v9z'/></svg>") center/1em no-repeat;
@@ -311,6 +330,17 @@ body {
 .btn-primary:active {
   transform: translateY(1px);
 }
+.btn-primary:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.24), 0 12px 26px rgba(2,6,23,.35), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.btn-primary:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  filter: grayscale(.15);
+  transform: none;
+}
 
 .btn-ghost {
   background: #0f141b;
@@ -319,6 +349,16 @@ body {
   border-radius: 12px;
   padding: 10px 14px;
   box-shadow: 0 10px 24px rgba(2,6,23,.35), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.btn-ghost:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.24), 0 10px 24px rgba(2,6,23,.35), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.btn-ghost:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  filter: grayscale(.15);
 }
 
 /* Page title/muted */
@@ -338,6 +378,11 @@ body {
   border-radius: 16px;
   padding: 12px 14px;
   box-shadow: 0 12px 28px rgba(0,0,0,.28), 0 2px 10px rgba(0,0,0,.18);
+  transition: transform .12s ease, box-shadow .25s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0,0,0,.32), 0 4px 14px rgba(0,0,0,.20);
 }
 .kpi-title {
   font-size: 12px;
