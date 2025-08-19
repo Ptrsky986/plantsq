@@ -398,3 +398,37 @@ body {
   font-weight: 700;
   color: #ffffff;
 }
+
+/* Responsive: móviles y tablets pequeñas */
+@media (max-width: 768px) {
+  /* Ocultar sidebar izquierdo para no tapar el contenido (usamos la nav inferior) */
+  .sidebar-modern { display: none; }
+
+  /* Contenido a ancho completo sin gutter izquierdo */
+  .main-modern {
+    max-width: none;
+    margin: 0;
+    padding: 12px;
+  }
+
+  /* Página de gráfica: usar 100vw y sin margen izquierdo */
+  .main-wide {
+    max-width: none;
+    width: 100vw;
+    margin: 0;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  /* Contenedor de la gráfica: evitar scroll horizontal forzado */
+  .chart-host {
+    min-width: 0;
+    height: 420px;
+  }
+
+  /* KPIs en una columna */
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}

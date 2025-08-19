@@ -36,9 +36,24 @@ export default function AppLayout({ children }) {
         </Box>
       </Box>
 
-      <Box as="main" flex="1 1 auto" px={isChart ? 0 : [3, 4, 6]} py={[3, 4, 6]} className={`main-modern ${isChart ? 'main-wide' : ''}`}>
+      <Box as="main" flex="1 1 auto" px={isChart ? 0 : [3, 4, 6]} pt={[3, 4, 6]} pb={[16, 20, 6]} className={`main-modern ${isChart ? 'main-wide' : ''}`}>
         {children}
       </Box>
+
+      {/* Bottom navigation (solo móvil) */}
+      <Flex as="nav" className="nav-modern" display={[ 'flex', 'flex', 'none' ]} px={4} py={2} justify="space-around" align="center">
+        {tabs.map(t => {
+          const Icon = t.icon
+          const isActive = location.pathname.startsWith(t.to)
+          return (
+            <NavLink key={`bottom-${t.to}`} to={t.to} style={{ textDecoration: 'none' }}>
+              <Flex direction="column" align="center" className={`nav-item ${isActive ? 'is-active' : ''}`}>
+                <IconButton aria-label={t.label} title={t.label} icon={<Icon />} variant="ghost" className="nav-icon" />
+              </Flex>
+            </NavLink>
+          )
+        })}
+      </Flex>
     </Flex>
   )
 }
