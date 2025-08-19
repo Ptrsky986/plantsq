@@ -229,11 +229,7 @@ body {
   border-color: rgba(15,23,42,0.10);
 }
 .nav-top .nav-item .nav-label {
-  font-size: 11px;
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 .nav-top .nav-item.is-active .nav-icon {
   background: rgba(99,102,241,0.10);
