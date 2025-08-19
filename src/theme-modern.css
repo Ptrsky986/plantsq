@@ -225,16 +225,36 @@ body {
   width: 32px;
   height: 32px;
   font-size: 16px;
-  border-radius: 10px;
-  border-color: rgba(15,23,42,0.10);
+  border-radius: 12px;
+  background: #0b0c10 !important; /* ventana negra */
+  color: #fff !important; /* símbolo blanco */
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.25);
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease;
+  will-change: transform;
 }
 .nav-top .nav-item .nav-label {
   display: none;
 }
 .nav-top .nav-item.is-active .nav-icon {
-  background: rgba(99,102,241,0.10);
-  border-color: rgba(99,102,241,0.30);
-  box-shadow: 0 6px 14px rgba(99,102,241,0.12);
+  background: #0f1123 !important;
+  color: #fff !important;
+  border-color: rgba(99,102,241,0.45);
+  box-shadow: 0 18px 36px rgba(99,102,241,0.35), 0 6px 16px rgba(0,0,0,0.30), 0 0 0 2px rgba(99,102,241,0.30) inset;
+}
+
+/* Hover/Active/Focus states para el efecto flotante marcado */
+.nav-top .nav-item .nav-icon:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.40), 0 8px 20px rgba(0,0,0,0.28);
+}
+.nav-top .nav-item .nav-icon:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.36), 0 4px 12px rgba(0,0,0,0.26);
+}
+.nav-top .nav-item .nav-icon:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.35), 0 14px 28px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.25);
 }
 
 /* Nav items */
