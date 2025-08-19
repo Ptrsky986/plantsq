@@ -33,14 +33,15 @@ export default function Chart() {
 
     // 3) Serie azul: pronóstico solo desde el día posterior al último real, usando cartera base
     const nSignals = 3 + (thirdSignal?.active ? 1 : 0)
-    const dailyRate = 0.0058 * nSignals // 0.58% por señal
+    // Composición por señal: cada señal incrementa 0.58% sucesivamente
+    const dailyMultiplier = Math.pow(1 + 0.0058, nSignals)
     const realDates = Object.keys(days).sort()
     const lastRealISO = realDates.length ? realDates[realDates.length - 1] : null
     let base = lastRealISO ? (days[lastRealISO]?.portfolioAfter ?? (Number(settings.initialPortfolio) || 0)) : (Number(settings.initialPortfolio) || 0)
     const forecastByDay = {}
     for (const d of categories) {
       if (!lastRealISO || isAfter(parseISO(d), parseISO(lastRealISO))) {
-        base = Number((base * (1 + dailyRate)).toFixed(2))
+        base = Number((base * dailyMultiplier).toFixed(2))
         forecastByDay[d] = base
       } else {
         forecastByDay[d] = null
