@@ -20,7 +20,8 @@ export default function AppLayout({ children }) {
 
   return (
     <Flex direction="row" className="app-shell" style={{ minHeight: '100dvh' }}>
-      <Box as="aside" className="sidebar-modern" px={3} py={4}>
+      {/* Sidebar solo escritorio (>= xl) */}
+      <Box as="aside" className="sidebar-modern" px={3} py={4} display={[ 'none', 'none', 'none', 'none', 'flex' ]}>
         <Box className="vertical-nav" pt={1}>
           {tabs.map(t => {
             const Icon = t.icon
@@ -36,24 +37,24 @@ export default function AppLayout({ children }) {
         </Box>
       </Box>
 
-      <Box as="main" flex="1 1 auto" px={isChart ? 0 : [3, 4, 6]} pt={[3, 4, 6]} pb={[16, 20, 6]} className={`main-modern ${isChart ? 'main-wide' : ''}`}>
+      <Box as="main" flex="1 1 auto" px={isChart ? 0 : [3, 4, 6]} pt={[3, 4, 6]} pb={[6, 8, 6]} className={`main-modern ${isChart ? 'main-wide' : ''}`}>
+        {/* Top navigation (móvil y tablet), sticky encima de cabeceras */}
+        <Flex as="nav" className="nav-modern nav-top" display={[ 'flex', 'flex', 'flex', 'flex', 'none' ]} px={2} py={2} gap={2} justify="space-between" align="stretch" mb={3} w="100%">
+          {tabs.map(t => {
+            const Icon = t.icon
+            const isActive = location.pathname.startsWith(t.to)
+            return (
+              <NavLink key={`top-${t.to}`} to={t.to} style={{ textDecoration: 'none', display: 'flex', flex: '1 1 0', minWidth: 0 }}>
+                <Flex direction="column" align="center" className={`nav-item ${isActive ? 'is-active' : ''}`} flex="1 1 0" minW={0}>
+                  <IconButton aria-label={t.label} title={t.label} icon={<Icon />} variant="ghost" className="nav-icon" />
+                  <Box as="span" className="nav-label">{t.label}</Box>
+                </Flex>
+              </NavLink>
+            )
+          })}
+        </Flex>
         {children}
       </Box>
-
-      {/* Bottom navigation (solo móvil) */}
-      <Flex as="nav" className="nav-modern" display={[ 'flex', 'flex', 'none' ]} px={4} py={2} justify="space-around" align="center">
-        {tabs.map(t => {
-          const Icon = t.icon
-          const isActive = location.pathname.startsWith(t.to)
-          return (
-            <NavLink key={`bottom-${t.to}`} to={t.to} style={{ textDecoration: 'none' }}>
-              <Flex direction="column" align="center" className={`nav-item ${isActive ? 'is-active' : ''}`}>
-                <IconButton aria-label={t.label} title={t.label} icon={<Icon />} variant="ghost" className="nav-icon" />
-              </Flex>
-            </NavLink>
-          )
-        })}
-      </Flex>
     </Flex>
   )
 }

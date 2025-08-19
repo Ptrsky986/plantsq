@@ -8,6 +8,49 @@
   width: 100%;
   margin-inline: auto;
 }
+
+/* Tablets y pantallas medianas: aplicar mismas reglas que móvil hasta 1279px */
+@media (min-width: 769px) and (max-width: 1279px) {
+  /* Ocultar sidebar/vertical-nav por completo */
+  .sidebar-modern { display: none !important; }
+  .vertical-nav, .vnav-item, .vnav-icon { display: none !important; }
+
+  /* Contenido a ancho completo */
+  .main-modern {
+    max-width: none;
+    margin: 0;
+    padding: 16px;
+  }
+  .main-wide {
+    max-width: none;
+    width: 100vw;
+    margin: 0;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  /* Barra superior full-bleed */
+  .nav-modern.nav-top {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: 16px;
+    padding-right: 16px;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  /* Gráfica sin overflow */
+  .chart-host {
+    min-width: 0;
+    height: 480px;
+  }
+}
 :root {
   /* Paleta clara estilo Finance Dashboard */
   --bg: #f6f7fb;
@@ -155,6 +198,36 @@ body {
   background: var(--bg-soft);
   border-top: 1px solid var(--border);
   box-shadow: 0 -6px 16px rgba(15,23,42,.06);
+}
+
+/* Variante superior para móvil: sticky arriba */
+.nav-modern.nav-top {
+  top: 0;
+  bottom: auto;
+  z-index: 15;
+  border-top: none;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 6px 16px rgba(15,23,42,.06);
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+}
+
+/* Asegurar que la barra superior es visible por defecto en móvil */
+.nav-top { display: flex; }
+
+/* Ocultar barra superior solo en escritorio grande (>=1280px) */
+@media (min-width: 1280px) {
+  .nav-top { display: none !important; }
+}
+
+/* Estilo de iconos en la barra superior: chips suaves */
+.nav-top .nav-item .nav-icon {
+  border-radius: 12px;
+  border-color: rgba(15,23,42,0.10);
+}
+.nav-top .nav-item.is-active .nav-icon {
+  background: rgba(99,102,241,0.10);
+  border-color: rgba(99,102,241,0.30);
+  box-shadow: 0 6px 14px rgba(99,102,241,0.12);
 }
 
 /* Nav items */
@@ -401,8 +474,9 @@ body {
 
 /* Responsive: móviles y tablets pequeñas */
 @media (max-width: 768px) {
-  /* Ocultar sidebar izquierdo para no tapar el contenido (usamos la nav inferior) */
-  .sidebar-modern { display: none; }
+  /* Ocultar sidebar/vertical-nav por completo */
+  .sidebar-modern { display: none !important; }
+  .vertical-nav, .vnav-item, .vnav-icon { display: none !important; }
 
   /* Contenido a ancho completo sin gutter izquierdo */
   .main-modern {
@@ -419,6 +493,23 @@ body {
     margin-left: 0;
     padding-left: 0;
   }
+
+  /* Barra superior: full-bleed y layout consistente en grid */
+  .nav-modern.nav-top {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: 12px;
+    padding-right: 12px;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .nav-modern.nav-top .nav-item { width: 100%; }
 
   /* Contenedor de la gráfica: evitar scroll horizontal forzado */
   .chart-host {
