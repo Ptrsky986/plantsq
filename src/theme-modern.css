@@ -220,9 +220,20 @@ body {
 }
 
 /* Estilo de iconos en la barra superior: chips suaves */
+.nav-top .nav-item { gap: 2px; min-width: 0; }
 .nav-top .nav-item .nav-icon {
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  border-radius: 10px;
   border-color: rgba(15,23,42,0.10);
+}
+.nav-top .nav-item .nav-label {
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .nav-top .nav-item.is-active .nav-icon {
   background: rgba(99,102,241,0.10);

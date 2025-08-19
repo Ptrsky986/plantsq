@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 const tabs = [
   { to: '/signals2', label: 'Señales', icon: FiTrendingUp },
   { to: '/chart', label: 'Gráfica', icon: FiActivity },
-  { to: '/operations', label: 'Operaciones', icon: FiList },
+  { to: '/operations', label: 'Oper', icon: FiList },
   { to: '/settings', label: 'Ajustes', icon: FiSettings },
 ]
 
@@ -46,7 +46,7 @@ export default function AppLayout({ children }) {
             return (
               <NavLink key={`top-${t.to}`} to={t.to} style={{ textDecoration: 'none', display: 'flex', flex: '1 1 0', minWidth: 0 }}>
                 <Flex direction="column" align="center" className={`nav-item ${isActive ? 'is-active' : ''}`} flex="1 1 0" minW={0}>
-                  <IconButton aria-label={t.label} title={t.label} icon={<Icon />} variant="ghost" className="nav-icon" />
+                  <IconButton aria-label={t.label} title={t.label} icon={<Icon />} size="sm" fontSize="16px" variant="ghost" className="nav-icon" />
                   <Box as="span" className="nav-label">{t.label}</Box>
                 </Flex>
               </NavLink>
