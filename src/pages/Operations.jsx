@@ -1,4 +1,4 @@
-import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Tag, HStack, Button, Select, Text, Input } from '@chakra-ui/react'
+import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Tag, HStack, Button, Select, Text, Input, Switch, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import useAppStore from '../store/useAppStore'
 import { jsPDF } from 'jspdf'
@@ -6,10 +6,23 @@ import { jsPDF } from 'jspdf'
 const SIGNAL_NAMES = ['Señal 1', 'Señal 2', 'Señal 3', 'Señal 4']
 
 export default function Operations() {
-  const { days, addWithdrawal, clearWithdrawal } = useAppStore()
+  const {
+    days,
+    addWithdrawal,
+    clearWithdrawal,
+    addReward,
+    clearReward,
+    thirdSignal,
+    activateThirdSignal,
+    deactivateThirdSignal,
+    setThirdSignalStartDate,
+    daysRemainingThird,
+  } = useAppStore()
   const [monthFilter, setMonthFilter] = useState('') // format: YYYY-MM
   const [wDate, setWDate] = useState('')
   const [wAmount, setWAmount] = useState('')
+  const [rDate, setRDate] = useState('')
+  const [rAmount, setRAmount] = useState('')
 
   const rows = useMemo(() => {
     const entries = Object.entries(days).sort(([a], [b]) => (a < b ? -1 : 1))
@@ -26,9 +39,14 @@ export default function Operations() {
       if (wd > 0) {
         list.push({ date, signal: 'Retirada', result: -wd, dailySum: Number(data?.dailySum) || 0 })
       }
+      // Fila de recompensa si aplica
+      const rw = Number(data?.reward) || 0
+      if (rw > 0) {
+        list.push({ date, signal: 'Recompensa', result: rw, dailySum: Number(data?.dailySum) || 0 })
+      }
       // Si no hubo señales ni retirada, mostrar placeholder
       const hasNonZeroSignal = signals.some(v => Number(v) !== 0)
-      if (!hasNonZeroSignal && wd <= 0) {
+      if (!hasNonZeroSignal && wd <= 0 && rw <= 0) {
         list.push({ date, signal: '—', result: 0, dailySum: Number(data?.dailySum) || 0 })
       }
     }
@@ -46,17 +64,19 @@ export default function Operations() {
     const entries = Object.entries(days).filter(([d]) => !monthFilter || d.startsWith(monthFilter))
     let totalPL = 0 // señales
     let totalWD = 0 // retiros
+    let totalRW = 0 // recompensas
     let pos = 0
     let neg = 0
     entries.forEach(([_, data]) => {
       const s = Number(data?.dailySum) || 0
       totalPL += s
       totalWD += Number(data?.withdrawal) || 0
+      totalRW += Number(data?.reward) || 0
       if (s > 0) pos += 1
       if (s < 0) neg += 1
     })
-    const net = totalPL - totalWD
-    return { daysCount: entries.length, totalPL, totalWD, net, pos, neg }
+    const net = totalPL - totalWD + totalRW
+    return { daysCount: entries.length, totalPL, totalWD, totalRW, net, pos, neg }
   }, [days, monthFilter])
 
   const exportPDF = () => {
@@ -98,6 +118,49 @@ export default function Operations() {
   return (
     <Box>
       <Heading size="lg" mb={4}>Operaciones</Heading>
+      {/* Control del periodo de la Señal 3 para que el contador funcione también aquí */}
+      <Box className="card-modern" p={4} maxW="420px" mb={4}>
+        <Heading size="sm" mb={2}>Señal 3 (periodo activo)</Heading>
+        <HStack justify="space-between" mb={2}>
+          <Text className="muted">Activar periodo</Text>
+          <Switch
+            isChecked={!!thirdSignal?.active}
+            onChange={(e) => {
+              const checked = e.target.checked
+              if (checked) {
+                // Inicia el periodo usando la fecha elegida en el input, igual que en Signals.jsx
+                const chosen = thirdSignal?.startDate
+                if (chosen) {
+                  activateThirdSignal(chosen)
+                } else {
+                  // Si no hay fecha elegida, usar hoy
+                  activateThirdSignal()
+                }
+              } else {
+                deactivateThirdSignal()
+              }
+            }}
+          />
+          {thirdSignal?.active && (
+            <Button size="sm" ml={3} onClick={() => activateThirdSignal()} className="btn-primary">
+              Reiniciar a hoy
+            </Button>
+          )}
+        </HStack>
+        <Text mb={1} fontSize="sm" className="muted">Fecha de inicio del periodo</Text>
+        <Input
+          className="input-modern"
+          type="date"
+          value={thirdSignal?.startDate || ''}
+          onChange={(e) => setThirdSignalStartDate(e.target.value)}
+          maxW="220px"
+        />
+        {thirdSignal?.active && thirdSignal?.startDate && (
+          <Text mt={2} fontSize="sm" className="muted">
+            Días restantes del periodo: {daysRemainingThird(thirdSignal.startDate)}
+          </Text>
+        )}
+      </Box>
       <HStack mb={3} gap={3} align="center">
         <Select placeholder="Filtrar por mes" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} maxW="220px" bg="white">
           {months.map(m => (
@@ -147,6 +210,24 @@ export default function Operations() {
         <Box className="kpi-card">
           <Text className="kpi-title">Días + / -</Text>
           <Text className="kpi-value">{summary.pos} / {summary.neg}</Text>
+        </Box>
+        {/* Nueva ventana de Recompensa a la derecha de "Días +/-" */}
+        <Box className="kpi-card">
+          <Text className="kpi-title">Recompensa</Text>
+          <VStack align="stretch" gap={2}>
+            <Box>
+              <Text className="kpi-title" mb={1}>Fecha</Text>
+              <Input type="date" className="input-modern" value={rDate} onChange={(e) => setRDate(e.target.value)} maxW="220px" />
+            </Box>
+            <Box>
+              <Text className="kpi-title" mb={1}>Cantidad (USDT)</Text>
+              <Input type="number" className="input-modern" placeholder="0" value={rAmount} onChange={(e) => setRAmount(e.target.value)} maxW="220px" />
+            </Box>
+            <HStack gap={2}>
+              <Button colorScheme="teal" onClick={() => { if (rDate) { addReward(rDate, Number(rAmount)); } }}>Añadir</Button>
+              <Button onClick={() => { if (rDate) { clearReward(rDate); } }}>Borrar del día</Button>
+            </HStack>
+          </VStack>
         </Box>
       </Box>
 

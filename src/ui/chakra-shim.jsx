@@ -132,3 +132,43 @@ export const Select = React.forwardRef(function SelectCmp({ isDisabled, placehol
     </select>
   )
 })
+
+// Switch (simplificado)
+export function Switch({ isChecked, onChange, isDisabled, ...rest }) {
+  const checked = !!isChecked
+  const other = filterDomProps(rest)
+  const trackStyle = {
+    width: 36,
+    height: 20,
+    background: checked ? '#3182ce' : '#ccc',
+    borderRadius: 999,
+    position: 'relative',
+    transition: 'background .2s',
+    display: 'inline-block'
+  }
+  const thumbStyle = {
+    position: 'absolute',
+    top: 2,
+    left: checked ? 18 : 2,
+    width: 16,
+    height: 16,
+    background: '#fff',
+    borderRadius: '50%',
+    transition: 'left .2s'
+  }
+  return (
+    <label style={{ display: 'inline-flex', alignItems: 'center', cursor: isDisabled ? 'not-allowed' : 'pointer', opacity: isDisabled ? 0.6 : 1 }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange && onChange({ target: { checked: e.target.checked } })}
+        disabled={!!isDisabled}
+        style={{ display: 'none' }}
+        {...other}
+      />
+      <span style={trackStyle}>
+        <span style={thumbStyle} />
+      </span>
+    </label>
+  )
+}
