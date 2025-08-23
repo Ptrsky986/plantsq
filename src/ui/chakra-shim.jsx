@@ -98,6 +98,14 @@ export const Input = React.forwardRef(function InputCmp({ isDisabled, ...rest },
   return <input ref={ref} disabled={!!isDisabled} {...filterDomProps(rest)} />
 })
 
+// Divider
+export function Divider(props) {
+  const base = { border: 'none', borderTop: '1px solid rgba(255,255,255,0.12)', width: '100%' }
+  const style = { ...base, ...styleFromProps(props) }
+  const rest = filterDomProps(props)
+  return <hr {...rest} style={style} />
+}
+
 // Tabla
 export function Table(props) {
   const style = { width: '100%', borderCollapse: 'collapse', ...styleFromProps(props) }

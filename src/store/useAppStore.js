@@ -222,7 +222,8 @@ const useAppStore = create(persist((set, get) => ({
       }
 
       set({ settings, thirdSignal, days })
-      // Persistencia se maneja automáticamente por el middleware
+      // Forzar guardado inmediato para que un reload refleje los datos importados
+      try { useAppStore.persist?.save?.() } catch {}
       // eslint-disable-next-line no-console
       console.info('[Store] Importación completada. Días:', Object.keys(days).length)
     } catch (e) {

@@ -1,4 +1,5 @@
-import { Box, Heading, Input, Button, VStack, Text, HStack, Divider } from '@chakra-ui/react'
+import { Box, Heading, Input, Button, VStack, Text, HStack, Divider, Textarea } from '@chakra-ui/react'
+import { useMemo, useState, useEffect } from 'react'
 import useAppStore from '../store/useAppStore'
 
 export default function Settings() {
@@ -9,7 +10,46 @@ export default function Settings() {
     setForecastWindow,
     exportState,
     importState,
+    days,
+    historyLastValue,
   } = useAppStore()
+
+  const [pasteOpen, setPasteOpen] = useState(false)
+  const [pasteText, setPasteText] = useState('')
+  const [cloudToken, setCloudToken] = useState('')
+  const [showCloud, setShowCloud] = useState(false)
+
+  // Mostrar bloque de nube si: ?owner=1 o existe token en localStorage o el usuario introduce un token
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('owner') === '1') setShowCloud(true)
+      const saved = localStorage.getItem('plantsq2-cloud-token') || ''
+      if (saved) {
+        setCloudToken(saved)
+        setShowCloud(true)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    const t = (cloudToken || '').trim()
+    if (t) {
+      try { localStorage.setItem('plantsq2-cloud-token', t) } catch {}
+      setShowCloud(true)
+    } else {
+      try { localStorage.removeItem('plantsq2-cloud-token') } catch {}
+    }
+  }, [cloudToken])
+
+  const diagnostics = useMemo(() => {
+    const keys = Object.keys(days || {}).sort()
+    const count = keys.length
+    const firstDate = count > 0 ? keys[0] : '-'
+    const lastDate = count > 0 ? keys[count - 1] : '-'
+    const lastValue = typeof historyLastValue === 'function' ? historyLastValue() : 0
+    return { count, firstDate, lastDate, lastValue }
+  }, [days, historyLastValue])
 
   const onSave = () => {
     console.info('Ajustes guardados')
@@ -70,6 +110,32 @@ export default function Settings() {
 
               <Button
                 className="btn-outline"
+                onClick={async () => {
+                  try {
+                    const data = exportState()
+                    const json = JSON.stringify(data, null, 2)
+                    if (navigator.clipboard?.writeText) {
+                      await navigator.clipboard.writeText(json)
+                      alert('JSON copiado al portapapeles')
+                    } else {
+                      // Fallback
+                      const ta = document.createElement('textarea')
+                      ta.value = json
+                      document.body.appendChild(ta)
+                      ta.select()
+                      document.execCommand('copy')
+                      ta.remove()
+                      alert('JSON copiado (método alternativo)')
+                    }
+                  } catch (e) {
+                    console.error('Error al copiar JSON', e)
+                    alert('No se pudo copiar al portapapeles')
+                  }
+                }}
+              >Copiar JSON</Button>
+
+              <Button
+                className="btn-outline"
                 onClick={() => {
                   const input = document.getElementById('plantsq2-import-file')
                   if (input) input.click()
@@ -95,7 +161,121 @@ export default function Settings() {
                   }
                 }}
               />
+
+              <Button
+                className="btn-outline"
+                onClick={() => setPasteOpen((v) => !v)}
+              >Pegar JSON (importar)</Button>
             </HStack>
+            {pasteOpen && (
+              <Box mt={3}>
+                <Text mb={2} className="muted">Pega aquí el JSON exportado (por ejemplo desde producción/Firefox) y pulsa Importar:</Text>
+                <Textarea
+                  className="input-modern"
+                  rows={8}
+                  value={pasteText}
+                  onChange={(e) => setPasteText(e.target.value)}
+                  placeholder="Pega aquí el JSON exportado y pulsa 'Importar desde texto'"
+                />
+                <HStack mt={2} gap={2}>
+                  <Button
+                    className="btn-primary"
+                    onClick={() => {
+                      try {
+                        if (!pasteText.trim()) return alert('No hay contenido para importar')
+                        importState(pasteText)
+                        alert('Importación desde texto completada. Recarga si no ves cambios.')
+                        setPasteText('')
+                      } catch (e) {
+                        console.error('Error al importar desde texto', e)
+                        alert('Error al importar desde texto')
+                      }
+                    }}
+                  >Importar desde texto</Button>
+                  <Button className="btn-outline" onClick={() => setPasteText('')}>Limpiar</Button>
+                </HStack>
+              </Box>
+            )}
+
+            <Divider my={4} />
+            <Box>
+              <Heading size="sm" mb={2}>Resumen de datos</Heading>
+              <Text className="muted">Días guardados: <b>{diagnostics.count}</b></Text>
+              <Text className="muted">Primera fecha: <b>{diagnostics.firstDate}</b></Text>
+              <Text className="muted">Última fecha: <b>{diagnostics.lastDate}</b></Text>
+              <Text className="muted">Cartera actual: <b>{diagnostics.lastValue}</b></Text>
+            </Box>
+
+            {showCloud && (
+              <>
+                <Divider my={4} />
+                <Box>
+                  <Heading size="md" mb={2}>Copia en la nube (Netlify)</Heading>
+                  <Text mb={3} className="muted">Guarda y recupera tus datos en la nube usando funciones serverless. Opcionalmente, indica un token si configuraste seguridad.</Text>
+                  <VStack align="stretch" gap={3} maxW="640px">
+                    <Box>
+                      <Text mb={1} fontSize="sm" className="muted">Token (opcional)</Text>
+                      <Input
+                        className="input-modern"
+                        type="password"
+                        placeholder="x-backup-token"
+                        value={cloudToken}
+                        onChange={(e) => setCloudToken(e.target.value)}
+                      />
+                    </Box>
+                    <HStack gap={3} flexWrap="wrap">
+                      <Button
+                        className="btn-primary"
+                        onClick={async () => {
+                          try {
+                            const data = exportState()
+                            const res = await fetch('https://plantsq.netlify.app/.netlify/functions/save-backup', {
+                              method: 'POST',
+                              headers: cloudToken.trim() ? {
+                                'Content-Type': 'application/json',
+                                'X-Backup-Token': cloudToken.trim(),
+                              } : { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(data),
+                            })
+                            if (!res.ok) {
+                              const txt = await res.text()
+                              throw new Error(txt || `HTTP ${res.status}`)
+                            }
+                            const out = await res.json()
+                            alert(`Backup guardado: ${out.key || 'latest.json'}`)
+                          } catch (e) {
+                            console.error('Error al guardar en la nube', e)
+                            alert('Error al guardar en la nube')
+                          }
+                        }}
+                      >Guardar en la nube</Button>
+
+                      <Button
+                        className="btn-outline"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('https://plantsq.netlify.app/.netlify/functions/load-backup', {
+                              method: 'GET',
+                              headers: cloudToken.trim() ? { 'X-Backup-Token': cloudToken.trim() } : undefined,
+                            })
+                            if (!res.ok) {
+                              const txt = await res.text()
+                              throw new Error(txt || `HTTP ${res.status}`)
+                            }
+                            const json = await res.json()
+                            importState(json)
+                            alert('Backup cargado desde la nube. Recarga si no ves cambios.')
+                          } catch (e) {
+                            console.error('Error al cargar desde la nube', e)
+                            alert('Error al cargar desde la nube')
+                          }
+                        }}
+                      >Cargar desde la nube (latest)</Button>
+                    </HStack>
+                  </VStack>
+                </Box>
+              </>
+            )}
           </Box>
         </VStack>
       </Box>

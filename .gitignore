@@ -26,3 +26,6 @@ dist-ssr
 # Project backups and archives
 backup_*/
 *.zip
+
+# Local Netlify folder
+.netlify
