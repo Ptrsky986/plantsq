@@ -19,15 +19,15 @@ export default function Settings() {
   const [cloudToken, setCloudToken] = useState('')
   const [showCloud, setShowCloud] = useState(false)
 
-  // Mostrar bloque de nube si: ?owner=1 o existe token en localStorage o el usuario introduce un token
+  // Mostrar bloque de nube solo si existe token en localStorage
   useEffect(() => {
     try {
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('owner') === '1') setShowCloud(true)
       const saved = localStorage.getItem('plantsq2-cloud-token') || ''
       if (saved) {
         setCloudToken(saved)
         setShowCloud(true)
+      } else {
+        setShowCloud(false)
       }
     } catch {}
   }, [])
@@ -39,6 +39,7 @@ export default function Settings() {
       setShowCloud(true)
     } else {
       try { localStorage.removeItem('plantsq2-cloud-token') } catch {}
+      setShowCloud(false)
     }
   }, [cloudToken])
 
