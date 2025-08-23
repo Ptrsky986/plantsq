@@ -98,6 +98,11 @@ export const Input = React.forwardRef(function InputCmp({ isDisabled, ...rest },
   return <input ref={ref} disabled={!!isDisabled} {...filterDomProps(rest)} />
 })
 
+// Textarea
+export const Textarea = React.forwardRef(function TextareaCmp({ isDisabled, ...rest }, ref) {
+  return <textarea ref={ref} disabled={!!isDisabled} {...filterDomProps(rest)} />
+})
+
 // Divider
 export function Divider(props) {
   const base = { border: 'none', borderTop: '1px solid rgba(255,255,255,0.12)', width: '100%' }
