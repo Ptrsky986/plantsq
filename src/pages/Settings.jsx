@@ -17,30 +17,21 @@ export default function Settings() {
   const [pasteOpen, setPasteOpen] = useState(false)
   const [pasteText, setPasteText] = useState('')
   const [cloudToken, setCloudToken] = useState('')
-  const [showCloud, setShowCloud] = useState(false)
 
-  // Mostrar bloque de nube solo si existe token en localStorage
+  // Cargar token guardado (opcional) y persistir cambios, sin ocultar la sección de nube
   useEffect(() => {
     try {
       const saved = localStorage.getItem('plantsq2-cloud-token') || ''
-      if (saved) {
-        setCloudToken(saved)
-        setShowCloud(true)
-      } else {
-        setShowCloud(false)
-      }
+      setCloudToken(saved)
     } catch {}
   }, [])
 
   useEffect(() => {
-    const t = (cloudToken || '').trim()
-    if (t) {
-      try { localStorage.setItem('plantsq2-cloud-token', t) } catch {}
-      setShowCloud(true)
-    } else {
-      try { localStorage.removeItem('plantsq2-cloud-token') } catch {}
-      setShowCloud(false)
-    }
+    try {
+      const t = (cloudToken || '').trim()
+      if (t) localStorage.setItem('plantsq2-cloud-token', t)
+      else localStorage.removeItem('plantsq2-cloud-token')
+    } catch {}
   }, [cloudToken])
 
   const diagnostics = useMemo(() => {
@@ -207,8 +198,7 @@ export default function Settings() {
               <Text className="muted">Cartera actual: <b>{diagnostics.lastValue}</b></Text>
             </Box>
 
-            {showCloud && (
-              <>
+            <>
                 <Divider my={4} />
                 <Box>
                   <Heading size="md" mb={2}>Copia en la nube (Netlify)</Heading>
@@ -246,7 +236,7 @@ export default function Settings() {
                             alert(`Backup guardado: ${out.key || 'latest.json'}`)
                           } catch (e) {
                             console.error('Error al guardar en la nube', e)
-                            alert('Error al guardar en la nube')
+                            alert(`Error al guardar en la nube: ${e?.message || e}`)
                           }
                         }}
                       >Guardar en la nube</Button>
@@ -268,16 +258,41 @@ export default function Settings() {
                             alert('Backup cargado desde la nube. Recarga si no ves cambios.')
                           } catch (e) {
                             console.error('Error al cargar desde la nube', e)
-                            alert('Error al cargar desde la nube')
+                            alert(`Error al cargar desde la nube: ${e?.message || e}`)
                           }
                         }}
                       >Cargar desde la nube (latest)</Button>
+
+                      <Button
+                        className="btn-outline"
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('https://plantsq.netlify.app/.netlify/functions/load-backup', {
+                              method: 'GET',
+                              headers: cloudToken.trim() ? { 'X-Backup-Token': cloudToken.trim() } : undefined,
+                            })
+                            if (res.status === 200) {
+                              alert('Token OK (200)')
+                            } else if (res.status === 404) {
+                              alert('Token OK, pero no hay backup (404). Prueba "Guardar en la nube" primero.')
+                            } else if (res.status === 401) {
+                              const txt = await res.text().catch(() => '')
+                              alert('Unauthorized (401). El token no coincide con el configurado en Netlify.' + (txt ? `\n${txt}` : ''))
+                            } else {
+                              const txt = await res.text().catch(() => '')
+                              alert(`Respuesta HTTP ${res.status}. ${txt || ''}`)
+                            }
+                          } catch (e) {
+                            console.error('Error al probar token', e)
+                            alert('Error de red al probar token')
+                          }
+                        }}
+                      >Probar token</Button>
                     </HStack>
                   </VStack>
                 </Box>
               </>
-            )}
-          </Box>
+            </Box>
         </VStack>
       </Box>
     </Box>
