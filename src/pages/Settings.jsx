@@ -19,6 +19,17 @@ export default function Settings() {
 
   // Lógica de copia en la nube deshabilitada: se elimina manejo de token
 
+  // Gating de admin: activar con /settings?admin=1, desactivar con ?admin=0
+  const isAdmin = useMemo(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const q = params.get('admin')
+      if (q === '1') localStorage.setItem('plantsq_admin', '1')
+      if (q === '0') localStorage.removeItem('plantsq_admin')
+    } catch {}
+    return localStorage.getItem('plantsq_admin') === '1'
+  }, [])
+
   const diagnostics = useMemo(() => {
     const keys = Object.keys(days || {}).sort()
     const count = keys.length
@@ -56,6 +67,8 @@ export default function Settings() {
 
           <Button className="btn-primary" onClick={onSave}>Guardar</Button>
 
+          {isAdmin && (
+            <>
           <Divider my={2} />
 
           <Box>
@@ -184,6 +197,8 @@ export default function Settings() {
             </Box>
 
             </Box>
+            </>
+          )}
         </VStack>
       </Box>
     </Box>
