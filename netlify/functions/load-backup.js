@@ -27,7 +27,15 @@ export const handler = async (event) => {
     }
 
     const key = (event.queryStringParameters && event.queryStringParameters.key) || 'latest.json'
-    const store = getStore({ name: 'plantsq2-backups' })
+    // Blobs: contexto automático o configuración manual vía env
+    const opts = { name: 'plantsq2-backups' }
+    const manualSiteId = process.env.NETLIFY_BLOBS_SITE_ID || process.env.NETLIFY_SITE_ID || process.env.SITE_ID
+    const manualToken = process.env.NETLIFY_BLOBS_TOKEN
+    if (manualSiteId && manualToken) {
+      opts.siteID = manualSiteId
+      opts.token = manualToken
+    }
+    const store = getStore(opts)
 
     const content = await store.get(key)
     if (!content) {
@@ -41,6 +49,10 @@ export const handler = async (event) => {
       body: typeof content === 'string' ? content : JSON.stringify(content)
     }
   } catch (e) {
-    return { statusCode: 500, headers: corsHeaders, body: 'Internal Server Error' }
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      body: JSON.stringify({ error: 'Internal Server Error', message: e?.message || String(e) })
+    }
   }
 }

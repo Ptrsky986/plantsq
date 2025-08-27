@@ -38,7 +38,15 @@ export const handler = async (event) => {
     // Validación mínima de esquema
     const data = payload && payload.days && payload.settings ? payload : { ...payload, days: payload?.days || {}, settings: payload?.settings || {} }
 
-    const store = getStore({ name: 'plantsq2-backups' })
+    // Blobs: usar contexto automático de Netlify si existe; de lo contrario permitir configuración manual
+    const opts = { name: 'plantsq2-backups' }
+    const manualSiteId = process.env.NETLIFY_BLOBS_SITE_ID || process.env.NETLIFY_SITE_ID || process.env.SITE_ID
+    const manualToken = process.env.NETLIFY_BLOBS_TOKEN
+    if (manualSiteId && manualToken) {
+      opts.siteID = manualSiteId
+      opts.token = manualToken
+    }
+    const store = getStore(opts)
     const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
     const versionKey = `backup-${ts}.json`
 
