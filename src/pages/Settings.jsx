@@ -183,7 +183,6 @@ export default function Settings() {
               <Text className="muted">Cartera actual: <b>{diagnostics.lastValue}</b></Text>
             </Box>
 
-            { /* Sección de copia en la nube (Netlify) deshabilitada temporalmente */ }
             </Box>
         </VStack>
       </Box>
