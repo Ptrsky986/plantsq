@@ -1,3 +1,4 @@
+// deploy: force rebuild 2025-08-27T19:02:20Z
 // Netlify Function: save-backup
 // Guarda un backup JSON en Netlify Blobs. Mantiene una copia versionada y una 'latest'.
 import { getStore } from '@netlify/blobs'
@@ -52,6 +53,10 @@ export const handler = async (event) => {
       body: JSON.stringify({ ok: true, key: versionKey })
     }
   } catch (e) {
-    return { statusCode: 500, headers: corsHeaders, body: 'Internal Server Error' }
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      body: JSON.stringify({ error: 'Internal Server Error', message: e?.message || String(e) })
+    }
   }
 }
