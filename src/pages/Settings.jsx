@@ -1,5 +1,5 @@
 import { Box, Heading, Input, Button, VStack, Text, HStack, Divider, Textarea } from '@chakra-ui/react'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import useAppStore from '../store/useAppStore'
 
 export default function Settings() {
@@ -16,23 +16,8 @@ export default function Settings() {
 
   const [pasteOpen, setPasteOpen] = useState(false)
   const [pasteText, setPasteText] = useState('')
-  const [cloudToken, setCloudToken] = useState('')
 
-  // Cargar token guardado (opcional) y persistir cambios, sin ocultar la sección de nube
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('plantsq2-cloud-token') || ''
-      setCloudToken(saved)
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    try {
-      const t = (cloudToken || '').trim()
-      if (t) localStorage.setItem('plantsq2-cloud-token', t)
-      else localStorage.removeItem('plantsq2-cloud-token')
-    } catch {}
-  }, [cloudToken])
+  // Lógica de copia en la nube deshabilitada: se elimina manejo de token
 
   const diagnostics = useMemo(() => {
     const keys = Object.keys(days || {}).sort()

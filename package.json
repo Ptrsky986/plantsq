@@ -14,7 +14,6 @@
     "@chakra-ui/react": "^3.24.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@netlify/blobs": "^8.0.0",
     "date-fns": "^4.1.0",
     "echarts": "^6.0.0",
     "framer-motion": "^12.23.12",
