@@ -16,6 +16,7 @@ export default function Settings() {
 
   const [pasteOpen, setPasteOpen] = useState(false)
   const [pasteText, setPasteText] = useState('')
+  const [exportTick, setExportTick] = useState(0)
 
   // Lógica de copia en la nube deshabilitada: se elimina manejo de token
 
@@ -38,6 +39,20 @@ export default function Settings() {
     const lastValue = typeof historyLastValue === 'function' ? historyLastValue() : 0
     return { count, firstDate, lastDate, lastValue }
   }, [days, historyLastValue])
+
+  const exportInfo = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('plantsq_last_export')
+      const lastMs = raw ? Number(raw) : 0
+      if (!lastMs) return { lastText: 'nunca', daysAgo: Infinity, needsExport: true }
+      const now = Date.now()
+      const days = Math.floor((now - lastMs) / (1000 * 60 * 60 * 24))
+      const date = new Date(lastMs).toLocaleString()
+      return { lastText: date, daysAgo: days, needsExport: days >= 7 }
+    } catch {
+      return { lastText: 'n/a', daysAgo: Infinity, needsExport: true }
+    }
+  }, [exportTick])
 
   const onSave = () => {
     console.info('Ajustes guardados')
@@ -74,6 +89,15 @@ export default function Settings() {
           <Box>
             <Heading size="md" mb={2}>Datos (Exportar / Importar)</Heading>
             <Text mb={3} className="muted">Usa estas acciones para respaldar o migrar tus datos entre entornos.</Text>
+            {isAdmin && (
+              <Box mb={3} p={2} borderRadius="md" className="muted" style={{ border: '1px dashed #666' }}>
+                <Text fontSize="sm">
+                  Recordatorio: exporta tu JSON con regularidad.
+                  Última exportación: <b>{exportInfo.lastText}</b>
+                  {exportInfo.daysAgo !== Infinity ? ` (hace ${exportInfo.daysAgo} días)` : ''}.
+                </Text>
+              </Box>
+            )}
             <HStack gap={3} flexWrap="wrap">
               <Button
                 className="btn-secondary"
@@ -91,6 +115,9 @@ export default function Settings() {
                     a.click()
                     a.remove()
                     URL.revokeObjectURL(url)
+                    // Registrar última exportación
+                    localStorage.setItem('plantsq_last_export', String(Date.now()))
+                    setExportTick((t) => t + 1)
                   } catch (e) {
                     console.error('Error al exportar', e)
                     alert('Error al exportar datos')
